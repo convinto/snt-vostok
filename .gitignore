@@ -8,3 +8,7 @@ instance/
 *.log
 .DS_Store
 .vscode/
+data/
+plot_36.csv
+import_plot_36.py
+_.txt
