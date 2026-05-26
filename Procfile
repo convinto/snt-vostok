@@ -1,1 +1,1 @@
-web: mkdir -p /data && flask db upgrade && python app.py
+web: ./start.sh
