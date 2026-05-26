@@ -12,8 +12,5 @@ if __name__ == '__main__':
     with app.app_context():
         upgrade()
     
-    # Получаем порт от Amvera (она передаёт его в переменной PORT)
-    port = int(os.environ.get('PORT', 5000))
-    print(f"ПРИЛОЖЕНИЕ СТАРТУЕТ НА ПОРТУ: {port}", flush=True)
-    
-    app.run(host='0.0.0.0', port=port)
+    # Слушаем порт 80 (Amvera требует именно его для containerPort=80)
+    app.run(host='0.0.0.0', port=80)
