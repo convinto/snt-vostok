@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+<!-- {% extends "base.html" %}
 {% block content %}
     <h1 class="mb-4">Добро пожаловать в СНТ «ВОСТОК»</h1>
 
@@ -140,5 +140,23 @@
                 {% endif %}
             </div>
         {% endfor %}
+    {% endif %}
+{% endblock %} -->
+
+{% extends "base.html" %}
+{% block content %}
+    <h1>Добро пожаловать в СНТ «ВОСТОК»</h1>
+    <p>Сайт работает!</p>
+    {% if posts %}
+        {% for post in posts %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ post.title }}</h5>
+                    <p class="card-text">{{ post.body | replace('\n', '<br>') | safe }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Пока нет новостей.</p>
     {% endif %}
 {% endblock %}
