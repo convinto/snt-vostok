@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Личный кабинет</h1>
+    
+    <!-- Информация о садоводе -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ current_user.full_name or current_user.username }}</h5>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">{{ current_user.email }}</dd>
+                <dt class="col-sm-3">Телефон</dt>
+                <dd class="col-sm-9">{{ current_user.phone or '—' }}</dd>
+                {% if current_user.plot %}
+                <dt class="col-sm-3">Участок</dt>
+                <dd class="col-sm-9">
+                    № {{ current_user.plot.plot_number }}
+                    {% if current_user.plot.area %}({{ current_user.plot.area }} сот.){% endif %}
+                </dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Показания счётчика -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">⚡ Электроэнергия</h5>
+                    {% if latest_reading %}
+                        <p>Последнее показание: <strong>{{ latest_reading.reading_value }}</strong> 
+                        от {{ latest_reading.reading_date.strftime('%d.%m.%Y') }}</p>
+                        {% if latest_reading.consumption %}
+                            <p>Расход: {{ latest_reading.consumption }} кВт⋅ч</p>
+                        {% endif %}
+                        <p>К оплате: <strong>
+                            {% if latest_reading.total_amount %}
+                                {{ "%.2f"|format(latest_reading.total_amount) }} ₽
+                            {% else %}
+                                0.00 ₽
+                            {% endif %}
+                        </strong></p>
+                    {% else %}
+                        <p>Показания не вносились</p>
+                    {% endif %}
+                    
+                    {% if readings %}
+                    <h6>Последние показания:</h6>
+                    <table class="table table-sm">
+                        <thead><tr>
+                            <th>Период</th><th>Показание</th><th>Расход</th>
+                            <th>Гос. тариф</th><th>Потери</th><th>ИТОГО</th>
+                            <th>Статус</th>
+                        </tr></thead>
+                        <tbody>
+                        {% for r in readings %}
+                            <tr>
+                                <td>{{ r.period }}</td>
+                                <td>{{ r.reading_value }}</td>
+                                <td>{{ r.consumption or '—' }}</td>
+                                <td>{{ r.base_amount or '—' }} ₽</td>
+                                <td>{{ r.losses_amount or '—' }} ₽</td>
+                                <td><strong>{{ r.total_amount or '—' }} ₽</strong></td>
+                                <td>{{ '✅' if r.is_verified else '⏳' }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {% if all_readings|length > 5 %}
+                        <button class="btn btn-outline-secondary btn-sm" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#fullHistory" 
+                                aria-expanded="false" aria-controls="fullHistory">
+                            📜 Вся история ({{ all_readings|length }} записей)
+                        </button>
+                        <div class="collapse" id="fullHistory">
+                            <table class="table table-sm mt-2">
+                                <thead><tr>
+                                    <th>Период</th><th>Показание</th><th>Расход</th>
+                                    <th>Гос. тариф</th><th>Потери</th><th>ИТОГО</th>
+                                    <th>Статус</th>
+                                </tr></thead>
+                                <tbody>
+                                {% for r in all_readings %}
+                                    <tr>
+                                        <td>{{ r.period }}</td>
+                                        <td>{{ r.reading_value }}</td>
+                                        <td>{{ r.consumption or '—' }}</td>
+                                        <td>{{ r.base_amount or '—' }} ₽</td>
+                                        <td>{{ r.losses_amount or '—' }} ₽</td>
+                                        <td><strong>{{ r.total_amount or '—' }} ₽</strong></td>
+                                        <td>{{ '✅' if r.is_verified else '⏳' }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p>Показания не вносились</p>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Платежи -->
+        <div class="col-md-6 mb-4">
+    <div class="card h-100">
+        <div class="card-body">
+            <h5 class="card-title">💰 Баланс и платежи</h5>
+            
+            <h6>Текущий баланс</h6>
+            <table class="table table-sm">
+                <tr>
+                    <td>Членские взносы</td>
+                    <td class="text-end">
+                        <span class="{% if balance_membership >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ "%.2f"|format(balance_membership) }} ₽
+                        </span>
+                        {% if balance_membership < 0 %}<br><small class="text-muted">задолженность {{ "%.2f"|format(-balance_membership) }} ₽</small>{% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Целевые взносы</td>
+                    <td class="text-end">
+                        <span class="{% if balance_target >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ "%.2f"|format(balance_target) }} ₽
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Электроэнергия</td>
+                    <td class="text-end">
+                        <span class="{% if balance_electricity >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ "%.2f"|format(balance_electricity) }} ₽
+                        </span>
+                    </td>
+                </tr>
+            </table>
+
+            {% if payments %}
+                <h6>Последние платежи</h6>
+                <table class="table table-sm">
+                    <thead><tr><th>Дата</th><th>Тип</th><th>Сумма</th><th>Статус</th></tr></thead>
+                    <tbody>
+                    {% for p in payments %}
+                        <tr>
+                            <td>{{ p.payment_date.strftime('%d.%m.%Y') }}</td>
+                            <td>
+                                {% if p.payment_type == 'membership' %}Взносы
+                                {% elif p.payment_type == 'electricity' %}Свет
+                                {% elif p.payment_type == 'target' %}Целевой
+                                {% else %}{{ p.payment_type }}
+                                {% endif %}
+                            </td>
+                            <td>{{ "%.2f"|format(p.amount) }} ₽</td>
+                            <td>
+                                {% if p.verified_by_admin %}
+                                    <span class="badge bg-success">Подтверждён</span>
+                                {% else %}
+                                    <span class="badge bg-warning">В обработке</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Платежей пока нет</p>
+            {% endif %}
+            
+            <a href="{{ url_for('payments.create') }}" class="btn btn-success btn-sm">Сформировать QR-код</a>
+        </div>
+    </div>
+</div>
+<div class="mt-3">
+    <a href="{{ url_for('appeals.create') }}" class="btn btn-outline-primary btn-sm">
+        📝 Подать обращение
+    </a>
+    <a href="{{ url_for('appeals.my_appeals') }}" class="btn btn-outline-secondary btn-sm ms-2">
+        Мои обращения
+    </a>
+</div>
+    </div>
+{% endblock %}

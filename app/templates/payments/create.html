@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Формирование платежа</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Реквизиты СНТ</h5>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Получатель</dt>
+                <dd class="col-sm-9">СНТ «ВОСТОК»</dd>
+                <dt class="col-sm-3">ИНН</dt>
+                <dd class="col-sm-9">5031022807</dd>
+                <dt class="col-sm-3">Счет</dt>
+                <dd class="col-sm-9">40703810040000007056</dd>
+                <dt class="col-sm-3">Банк</dt>
+                <dd class="col-sm-9">ПАО Сбербанк</dd>
+                <dt class="col-sm-3">БИК</dt>
+                <dd class="col-sm-9">044525225</dd>
+                <dt class="col-sm-3">Корр. счет</dt>
+                <dd class="col-sm-9">30101810400000000225</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Данные платежа</h5>
+            <form method="post">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    {{ form.payment_type.label(class="form-label") }}
+                    {{ form.payment_type(class="form-select") }}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.amount.label(class="form-label") }}
+                    {{ form.amount(class="form-control", placeholder="Например: 1500") }}
+                    {% for error in form.amount.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.plot_number.label(class="form-label") }}
+                    {{ form.plot_number(class="form-control", placeholder="Номер вашего участка") }}
+                </div>
+                
+                {{ form.submit(class="btn btn-success") }}
+            </form>
+        </div>
+    </div>
+{% endblock %}

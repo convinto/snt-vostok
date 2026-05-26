@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1 class="mb-4">Добро пожаловать в СНТ «ВОСТОК»</h1>
+
+    <div class="row">
+        <!-- Новости -->
+        <div class="col-md-8">
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+                                {% if post.author %} — {{ post.author.full_name or post.author.username }}{% endif %}
+                            </h6>
+                            <p class="card-text">{{ post.body | replace('\n', '<br>') | safe }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Пока нет новостей.</p>
+            {% endif %}
+        </div>
+
+        <!-- Правая колонка -->
+        <div class="col-md-4">
+            <!-- Блок социальных сетей (MAX и ВК горизонтально) -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <!-- MAX -->
+                        <div class="col-6">
+                            <h6 class="card-title">MAX</h6>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://max.ru/join/bSz9WtJ5bE8qSCqrDkLZapk31ImMOzbFHDEJVU7FRlk"
+                                 alt="QR-код группы MAX"
+                                 class="img-fluid mb-1"
+                                 style="max-width: 100px;">
+                            <div>
+                                <a href="https://max.ru/join/bSz9WtJ5bE8qSCqrDkLZapk31ImMOzbFHDEJVU7FRlk"
+                                   target="_blank"
+                                   class="btn btn-success btn-sm">
+                                    Перейти
+                                </a>
+                            </div>
+                        </div>
+                        <!-- ВКонтакте -->
+                        <div class="col-6">
+                            <h6 class="card-title">ВКонтакте</h6>
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://vk.ru/club239059388"
+                                 alt="QR-код группы ВКонтакте"
+                                 class="img-fluid mb-1"
+                                 style="max-width: 100px;">
+                            <div>
+                                <a href="https://vk.ru/club239059388"
+                                   target="_blank"
+                                   class="btn btn-primary btn-sm">
+                                    Перейти
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Контакты -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Контакты</h5>
+                    <p class="small mb-1">📞 +7 (993) 600-16-97</p>
+                    <p class="small mb-1">✉️ convinto-snt@yandex.ru</p>
+                    <p class="small mb-1">📍 142470, г. Электросталь, п. Фрязево</p>
+                </div>
+            </div>
+
+            <!-- Правление -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Правление СНТ "ВОСТОК"</h5>
+                    <p>Борисов Александр Александрович<br>
+                       1 отделение, участок №36. Тел. +7 (993) 600-16-97</p>
+                    <!-- При необходимости можно добавить остальных членов правления -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Блок задач на всю ширину -->
+    {% if tasks %}
+        <h2 class="mb-3 mt-4">🏗️ Текущие задачи и отчётность</h2>
+        {% for task in tasks %}
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between">
+                    <span><strong>{{ task.title }}</strong></span>
+                    <span>
+                        {% if task.status == 'planned' %}
+                            <span class="badge bg-secondary">Запланировано</span>
+                        {% elif task.status == 'in_progress' %}
+                            <span class="badge bg-warning text-dark">В процессе</span>
+                        {% elif task.status == 'completed' %}
+                            <span class="badge bg-success">Завершено</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% if task.description %}
+                    <div class="card-body py-2">
+                        <p class="mb-0 text-muted">{{ task.description }}</p>
+                    </div>
+                {% endif %}
+                {% set stages = task.stages.all() %}
+                {% if stages %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Этап</th>
+                                    <th>Статус</th>
+                                    <th>План, ₽</th>
+                                    <th>Факт, ₽</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stage in stages %}
+                                    <tr>
+                                        <td>{{ stage.title }}</td>
+                                        <td>
+                                            {% if stage.status == 'planned' %}Запланирован
+                                            {% elif stage.status == 'in_progress' %}Выполняется
+                                            {% elif stage.status == 'completed' %}Завершён
+                                            {% else %}{{ stage.status }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ "%.2f"|format(stage.planned_cost) }}</td>
+                                        <td>{{ "%.2f"|format(stage.actual_cost) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

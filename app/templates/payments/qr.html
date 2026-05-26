@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>QR-код для оплаты</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">1. Отсканируйте QR-код</h5>
+                    <img src="data:image/png;base64,{{ qr_base64 }}" 
+                         alt="QR-код для оплаты" 
+                         class="img-fluid mb-3" 
+                         style="max-width: 300px;">
+                    <p class="text-muted">
+                        Наведите камеру телефона или откройте сканер в вашем банковском приложении.
+                    </p>
+                    <div class="alert alert-info small">
+                        💡 <strong>Как оплатить:</strong> Откройте приложение банка → выберите «Оплата по QR-коду» или «Сканировать код» → наведите камеру на этот QR.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">2. Проверьте данные платежа</h5>
+                    <p>Платёж будет выполнен по этим реквизитам:</p>
+                    <dl class="row">
+                        <dt class="col-sm-5">Получатель</dt>
+                        <dd class="col-sm-7">{{ payment_data.receiver }}</dd>
+                        
+                        <dt class="col-sm-5">Назначение</dt>
+                        <dd class="col-sm-7">{{ payment_data.purpose }}</dd>
+                        
+                        <dt class="col-sm-5">Сумма</dt>
+                        <dd class="col-sm-7"><strong>{{ "%.2f"|format(payment_data.amount) }} ₽</strong></dd>
+                        
+                        <dt class="col-sm-5">ИНН</dt>
+                        <dd class="col-sm-7">{{ payment_data.inn }}</dd>
+                        
+                        <dt class="col-sm-5">Счёт получателя</dt>
+                        <dd class="col-sm-7"><code>{{ payment_data.account }}</code></dd>
+                        
+                        <dt class="col-sm-5">Банк</dt>
+                        <dd class="col-sm-7">{{ payment_data.bank }}</dd>
+                        
+                        <dt class="col-sm-5">БИК</dt>
+                        <dd class="col-sm-7">{{ payment_data.bik }}</dd>
+                        
+                        <dt class="col-sm-5">Корр. счёт</dt>
+                        <dd class="col-sm-7"><code>{{ payment_data.corr_account }}</code></dd>
+                    </dl>
+                    
+                    <a href="{{ url_for('payments.create') }}" class="btn btn-outline-success">Создать новый платёж</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
