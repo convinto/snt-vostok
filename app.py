@@ -3,16 +3,17 @@ from app import create_app
 
 app = create_app()
 
-# Автоматическое создание папки /data и миграции при старте
 if __name__ == '__main__':
-    # Создаём папку для базы данных, если её нет
+    # Создаём папку для базы
     os.makedirs('/data', exist_ok=True)
     
-    # Применяем миграции (без импорта Flask-Migrate вручную)
+    # Применяем миграции
     from flask_migrate import upgrade
     with app.app_context():
         upgrade()
     
-    # Запускаем на порту от Amvera или 5000 локально
+    # Получаем порт от Amvera (она передаёт его в переменной PORT)
     port = int(os.environ.get('PORT', 5000))
+    print(f"ПРИЛОЖЕНИЕ СТАРТУЕТ НА ПОРТУ: {port}", flush=True)
+    
     app.run(host='0.0.0.0', port=port)
