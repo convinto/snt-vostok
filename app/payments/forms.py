@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, FloatField, StringField, SubmitField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Length, NumberRange
 
 class PaymentForm(FlaskForm):
     payment_type = SelectField('Назначение платежа', 
