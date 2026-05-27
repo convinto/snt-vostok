@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>QR-код для оплаты</h1>
+    <div class="row">
+        <div class="col-md-6 text-center">
+            <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR-код" class="img-fluid mb-3" style="max-width:300px">
+            <p class="text-muted">Наведите камеру телефона или откройте сканер в банковском приложении</p>
+        </div>
+        <div class="col-md-6">
+            <h5>Детали платежа</h5>
+            <dl class="row">
+                <dt class="col-sm-5">Получатель</dt>
+                <dd class="col-sm-7">{{ payment_data.receiver }}</dd>
+                <dt class="col-sm-5">Назначение</dt>
+                <dd class="col-sm-7">{{ payment_data.purpose }}</dd>
+                <dt class="col-sm-5">Участок</dt>
+                <dd class="col-sm-7">{{ payment_data.plot }}</dd>
+                <dt class="col-sm-5">Сумма</dt>
+                <dd class="col-sm-7"><strong>{{ "%.2f"|format(payment_data.amount) }} ₽</strong></dd>
+                <dt class="col-sm-5">ИНН</dt>
+                <dd class="col-sm-7">{{ payment_data.inn }}</dd>
+                <dt class="col-sm-5">Счёт</dt>
+                <dd class="col-sm-7">{{ payment_data.account }}</dd>
+                <dt class="col-sm-5">Банк</dt>
+                <dd class="col-sm-7">{{ payment_data.bank }}</dd>
+                <dt class="col-sm-5">БИК</dt>
+                <dd class="col-sm-7">{{ payment_data.bik }}</dd>
+            </dl>
+            <a href="{{ url_for('payments.public_payment') }}" class="btn btn-outline-success">Создать новый платёж</a>
+        </div>
+    </div>
+{% endblock %}

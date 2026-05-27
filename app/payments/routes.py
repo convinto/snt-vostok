@@ -7,6 +7,7 @@ from qrcode import QRCode
 from qrcode.image.pil import PilImage
 from io import BytesIO
 import base64
+from app.payments.forms import PublicPaymentForm
 
 # Реквизиты СНТ
 SNT_REQUISITES = {
@@ -42,6 +43,40 @@ def generate_payment_qr_string(data):
     fields.append(f"LastName={escape_qr_string(data.get('payer_last_name', ''))}")
     fields.append(f"FirstName={escape_qr_string(data.get('payer_first_name', ''))}")
     return '|'.join(['ST00012'] + fields)
+
+@bp.route('/public', methods=['GET', 'POST'])
+def public_payment():
+    form = PublicPaymentForm()
+    if form.validate_on_submit():
+        payment_data = {
+            'receiver': SNT_REQUISITES['name'],
+            'inn': SNT_REQUISITES['inn'],
+            'kpp': SNT_REQUISITES.get('kpp', ''),
+            'account': SNT_REQUISITES['account'],
+            'bank': SNT_REQUISITES['bank'],
+            'bik': SNT_REQUISITES['bik'],
+            'corr_account': SNT_REQUISITES['corr_account'],
+            'purpose': f"{dict(form.payment_type.choices).get(form.payment_type.data)}, участок {form.plot_number.data}",
+            'amount': form.amount.data,
+            'plot': form.plot_number.data,
+            'payer_last_name': form.full_name.data.split()[0] if form.full_name.data else '',
+            'payer_first_name': ' '.join(form.full_name.data.split()[1:]) if form.full_name.data else ''
+        }
+        qr_string = generate_payment_qr_string(payment_data)
+
+        qr_img = QRCode()
+        qr_img.add_data(qr_string)
+        qr_img.make(fit=True)
+        img = qr_img.make_image(fill_color="black", back_color="white")
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+        return render_template('payments/public_qr.html',
+                               title='QR-код для оплаты',
+                               payment_data=payment_data,
+                               qr_base64=qr_base64)
+    return render_template('payments/public_create.html', title='Сформировать платёж', form=form)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
